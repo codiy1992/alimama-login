@@ -185,7 +185,6 @@ async function loginAlimama(browser) {
             );
             // 滑块验证
             slideValidtor(page, "#baxia-smsLogin > div > iframe", "#nc_1_n1z");
-            await page.waitForTimeout(300000);
         }
         // 判断是否有滑块
     } catch (e) {
