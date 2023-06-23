@@ -189,7 +189,11 @@ async function loginAlimama(browser) {
         await page.type("#fm-login-password", process.env.ALIMAMA_PASSWORD);
 
         // 验证是否有滑块
-        await slideValidtor(page);
+        await slideValidtor(
+            page,
+            "#baxia-password > div > iframe",
+            "#nc_1_n1z"
+        );
 
         // 点击登陆
         if (await page.waitForSelector("#login-form > div.fm-btn > button")) {
@@ -231,18 +235,18 @@ async function loginAlimama(browser) {
     console.log(currentTime() + " [Taobao] Login Successfully");
 }
 
-async function slideValidtor(page) {
-    if (await page.waitForSelector("#baxia-password > div > iframe")) {
+async function slideValidtor(page, iframe_selector, span_selector) {
+    if (await page.waitForSelector(iframe_selector)) {
         const frames = await page.frames();
         const frame = frames.find(
             (f) => f.url().indexOf("login.taobao.com") > -1
         );
-        const iframe = await page.$("#baxia-password > div > iframe");
+        const iframe = await page.$(iframe_selector);
 
         // 滑槽位置 和 滑块大小
         const iframe_rect = await iframe.boundingBox();
-        await frame.waitForSelector("#nc_1_n1z");
-        const span = await frame.$("#nc_1_n1z");
+        // await frame.waitForSelector(span_selector);
+        // const span = await frame.$(span_selector);
         const span_rect = { x: 0, y: 0, width: 42, height: 34 };
         // 确定鼠标起始位置
         const startX = iframe_rect.x + span_rect.width / 2 - 1;
@@ -323,14 +327,17 @@ async function slideValidtor(page) {
 
         const time_end = Date.now() / 1000;
         console.log(time_end - time_start);
-        await page.screenshot({
-            path: "./storage/debug/0.jpg",
-        });
         await page.waitForTimeout(200);
         await page.mouse.up().catch((e) => e);
-        await page.screenshot({
-            path: "./storage/debug/1.jpg",
-        });
+        if (span_selector == "#nc_1_n1z") {
+            await page.screenshot({
+                path: "./storage/debug/0.jpg",
+            });
+        } else {
+            await page.screenshot({
+                path: "./storage/debug/1.jpg",
+            });
+        }
     }
 }
 
