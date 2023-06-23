@@ -226,8 +226,14 @@ async function loginAlimama(browser) {
             console.log(
                 currentTime() + "[Taobao] >> Click Login Button Failed! <<"
             );
-            // 滑块验证
-            slideValidtor(page, "#baxia-smsLogin > div > iframe", "#nc_1_n1z");
+            try {
+                // 滑块验证
+                slideValidtor(
+                    page,
+                    "#baxia-smsLogin > div > iframe",
+                    "#nc_1_n1z"
+                );
+            } catch (e) {}
         }
         // 判断是否有滑块
     } catch (e) {
