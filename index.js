@@ -177,13 +177,13 @@ async function loginAlimama(browser) {
         await slideValidtor(page);
 
         // 点击登陆
-        await page.hover(
-            "#login > div.login-content.nc-outer-box > div > div.fm-btn"
-        );
-        await page.waitForTimeout(500);
-        await page
-            .click("#login > div.login-content.nc-outer-box > div > div.fm-btn")
-            .catch((e) => e);
+        if (await page.waitForSelector("#login-form > div.fm-btn > button")) {
+            await page.hover("#login-form > div.fm-btn > button");
+            await page.waitForTimeout(500);
+            await page
+                .click("#login-form > div.fm-btn > button")
+                .catch((e) => e);
+        }
 
         // 等待进入
         await page.waitForSelector("#header-info", {
