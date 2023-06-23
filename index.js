@@ -97,6 +97,7 @@ puppeteer.use(StealthPlugin());
                                     ".json",
                                 JSON.stringify(res.data, null, 2)
                             );
+                            page.setCookie(...res.data);
                             console.log(
                                 currentTime() + "[Taobao] Save new Cookies!"
                             );
