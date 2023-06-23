@@ -57,7 +57,7 @@ puppeteer.use(StealthPlugin());
         if (await page.waitForSelector("div[mxv='biz'] div.clearfix")) {
             await page.waitForTimeout(1000);
             await page.hover("div[mxv='biz'] div.clearfix");
-            page.click("div[mxv='biz'] div.clearfix").catch((e) => e);
+            await page.click("div[mxv='biz'] div.clearfix").catch((e) => e);
         }
         // 是否已进入后台
         await page.waitForSelector("#widget-rightMsg > span");
@@ -69,12 +69,12 @@ puppeteer.use(StealthPlugin());
         if (await page.waitForSelector("div[mxv='biz'] div.clearfix")) {
             await page.waitForTimeout(1000);
             await page.hover("div[mxv='biz'] div.clearfix");
-            page.click("div[mxv='biz'] div.clearfix").catch((e) => e);
+            await page.click("div[mxv='biz'] div.clearfix").catch((e) => e);
         }
         await page.waitForSelector("#widget-rightMsg > span");
     }
 
-    console.log("[Alimama] Enter Successfully!");
+    console.log(currentTime() + "[Alimama] Enter Successfully!");
     saveAndUploadCookies(page);
 
     schedule.scheduleJob("0 * * * * *", async () => {
@@ -83,7 +83,7 @@ puppeteer.use(StealthPlugin());
         let hours = date.getHours();
         let minutes = date.getMinutes();
         if (minutes % 5 == 0) {
-            console.log("[Alimama] Refreshing to Keep Alive!");
+            console.log(currentTime() + "[Alimama] Refreshing to Keep Alive!");
             (async () => {
                 await page.goto(
                     "https://pub.alimama.com/portal/v2/tool/links/page/home/index.htm"
@@ -92,7 +92,9 @@ puppeteer.use(StealthPlugin());
                     await page.waitForSelector("#widget-rightMsg > span");
                     saveAndUploadCookies(page);
                 } catch (e) {
-                    console.log("[Alimama] Account ReLogin Required!");
+                    console.log(
+                        currentTime() + "[Alimama] Account ReLogin Required!"
+                    );
                     await loginAlimama(browser);
                 }
             })();
@@ -114,7 +116,7 @@ async function saveAndUploadCookies(page) {
             cookie: alimama_cookies,
         })
         .then(function (res) {
-            console.log("[Alimama] Post Cookies Successfully");
+            console.log(currentTime() + "[Alimama] Post Cookies Successfully");
         })
         .catch(function (err) {
             console.log(err.message);
@@ -148,7 +150,7 @@ async function loginAlimama(browser) {
         const deserializedCookies = JSON.parse(cookies);
         await page.setCookie(...deserializedCookies);
         await page.goto(
-            "https://login.taobao.com/member/login.jhtml?style=mini&from=alimama&redirectURL=http%3A%2F%2Flogin.taobao.com%2Fmember%2Ftaobaoke%2Flogin.htm%3Fis_login%3d1&full_redirect=true&disableQuickLogin=true"
+            "https://login.taobao.com/member/login.jhtml?style=mini&from=alimama"
         );
         await page.waitForSelector(
             "#login > div.login-content.nc-outer-box > div > div.has-login-user-icon > img"
@@ -165,7 +167,7 @@ async function loginAlimama(browser) {
     } catch (e) {
         console.log(e.message);
         await page.goto(
-            "https://login.taobao.com/member/login.jhtml?style=mini&from=alimama&redirectURL=http%3A%2F%2Flogin.taobao.com%2Fmember%2Ftaobaoke%2Flogin.htm%3Fis_login%3d1&full_redirect=true&disableQuickLogin=true"
+            "https://login.taobao.com/member/login.jhtml?style=mini&from=alimama"
         );
         // 填写账号密码
         await page.waitForSelector("#fm-login-id");
@@ -185,21 +187,22 @@ async function loginAlimama(browser) {
                 .catch((e) => e);
         }
 
-        // 等待进入
+        // 等待进入 www.alimama.com
         await page.waitForSelector("#header-info", {
             timeout: 6000000,
         });
+
+        // 收集alimama的cookie
+        const alimama_cookies = await page.cookies();
+        fs.writeFileSync(
+            "storage/cookies/alimama." + process.env.ALIMAMA_USERNAME + ".json",
+            JSON.stringify(alimama_cookies, null, 2)
+        );
     }
 
-    // 收集alimama的cookie
-    const alimama_cookies = await page.cookies();
-    fs.writeFileSync(
-        "storage/cookies/alimama." + process.env.ALIMAMA_USERNAME + ".json",
-        JSON.stringify(alimama_cookies, null, 2)
-    );
     // 收集taobao的cookie
     await page.goto(
-        "https://login.taobao.com/member/login.jhtml?style=mini&from=alimama&redirectURL=http%3A%2F%2Flogin.taobao.com%2Fmember%2Ftaobaoke%2Flogin.htm%3Fis_login%3d1&full_redirect=true&disableQuickLogin=true"
+        "https://login.taobao.com/member/login.jhtml?style=mini&from=alimama&redirectURL=http%3A%2F%2Flogin.taobao.com%2Fmember%2Ftaobaoke%2Flogin.htm%3Fis_login%3d1&full_redirect=true&disableQuickLogin=false"
     );
 
     await page.waitForSelector(
@@ -212,7 +215,7 @@ async function loginAlimama(browser) {
         JSON.stringify(taobao_cookies, null, 2)
     );
 
-    console.log("[taobao] Login Successfully");
+    console.log(currentTime() + " [Taobao] Login Successfully");
 }
 
 async function slideValidtor(page) {
@@ -328,4 +331,22 @@ function uniformDeceleration(start, end, duration) {
     const distance = end - start;
     const acceleration = distance / duration ** 0.5;
     return (t) => end - 1.2 * acceleration * (duration - t) ** 2;
+}
+
+function currentTime() {
+    const date = new Date();
+    const options = {
+        timeZone: "Asia/Shanghai",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+    };
+    const formattedDate = date
+        .toLocaleString("en-US", options)
+        .replace(/(\d+)\/(\d+)\/(\d+),/, "$3/$1/$2");
+    return formattedDate;
 }
