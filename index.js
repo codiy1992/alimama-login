@@ -117,6 +117,7 @@ async function saveAndUploadCookies(page) {
         })
         .then(function (res) {
             console.log(currentTime() + "[Alimama] Post Cookies Successfully");
+            console.log(res.data);
         })
         .catch(function (err) {
             console.log(err.message);
@@ -159,10 +160,22 @@ async function loginAlimama(browser) {
             "#login > div.login-content.nc-outer-box > div > div.fm-btn"
         );
         await page.waitForTimeout(500);
-        page.click(
-            "#login > div.login-content.nc-outer-box > div > div.fm-btn"
-        ).catch((e) => e);
+        await page
+            .click("#login > div.login-content.nc-outer-box > div > div.fm-btn")
+            .catch((e) => e);
 
+        // 2秒后按钮还在, 说明点击不生效
+        await page.waitForTimeout(2000);
+        if (
+            await page.waitForSelector(
+                "#login > div.login-content.nc-outer-box > div > div.fm-btn"
+            )
+        ) {
+            console.log(
+                currentTime() + "[Taobao] >> Click Login Button Failed! <<"
+            );
+            await page.waitForTimeout(300000);
+        }
         // 判断是否有滑块
     } catch (e) {
         console.log(e.message);
