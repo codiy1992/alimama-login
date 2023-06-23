@@ -85,8 +85,17 @@ puppeteer.use(StealthPlugin());
         if (minutes % 5 == 0) {
             console.log(currentTime() + "[Alimama] Refreshing to Keep Alive!");
             (async () => {
+                const pages = [
+                    "https://pub.alimama.com/portal/v2/tool/links/page/home/index.htm",
+                    "https://pub.alimama.com/portal/v2/tool/toolServiceProviderMarket/index.htm",
+                    "https://pub.alimama.com/portal/v2/tool/materialPromoManage/index.htm",
+                    "https://pub.alimama.com/portal/v2/pages/tool/multiPromo/index.htm",
+                    "https://pub.alimama.com/portal/tool/tlj/account-pro/index.htm",
+                    "https://pub.alimama.com/portal/tool/tlj/plan/index.htm",
+                    "https://pub.alimama.com/portal/tool/query/index.htm",
+                ];
                 await page.goto(
-                    "https://pub.alimama.com/portal/v2/tool/links/page/home/index.htm"
+                    pages[Math.floor(Math.random() * pages.length)]
                 );
                 try {
                     await page.waitForSelector("#widget-rightMsg > span");
@@ -174,6 +183,8 @@ async function loginAlimama(browser) {
             console.log(
                 currentTime() + "[Taobao] >> Click Login Button Failed! <<"
             );
+            // 滑块验证
+            slideValidtor(page, "#baxia-smsLogin > div > iframe", "#nc_1_n1z");
             await page.waitForTimeout(300000);
         }
         // 判断是否有滑块
@@ -329,7 +340,7 @@ async function slideValidtor(page, iframe_selector, span_selector) {
         console.log(time_end - time_start);
         await page.waitForTimeout(200);
         await page.mouse.up().catch((e) => e);
-        if (span_selector == "#nc_1_n1z") {
+        if (iframe_selector == "#baxia-password > div > iframe") {
             await page.screenshot({
                 path: "./storage/debug/0.jpg",
             });
