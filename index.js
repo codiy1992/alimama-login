@@ -120,7 +120,7 @@ puppeteer.use(StealthPlugin());
                             );
                             page.setCookie(...res.data);
                             console.log(
-                                currentTime() + "[Taobao] Save new Cookies!"
+                                currentTime() + "[Alimama] Save new Cookies!"
                             );
                         }
                     })
