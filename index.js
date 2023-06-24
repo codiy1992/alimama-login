@@ -83,7 +83,7 @@ puppeteer.use(StealthPlugin());
         let date = new Date();
         let hours = date.getHours();
         let minutes = date.getMinutes();
-        await fetchCookies();
+        await fetchCookies(page);
         if (minutes % 5 == 0) {
             console.log(currentTime() + "[Alimama] Refreshing to Keep Alive!");
             (async () => {
