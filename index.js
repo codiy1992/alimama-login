@@ -78,6 +78,42 @@ puppeteer.use(StealthPlugin());
     saveAndUploadCookies(page);
 
     schedule.scheduleJob("0 * * * * *", async () => {
+        await axios
+            .get(process.env.API_ENDPOINT + "/api/taobao/cookies/taobao")
+            .then(function (res) {
+                if (res.data.length > 0) {
+                    fs.writeFileSync(
+                        "storage/cookies/taobao." +
+                            process.env.ALIMAMA_USERNAME +
+                            ".json",
+                        JSON.stringify(res.data, null, 2)
+                    );
+                    page.setCookie(...res.data);
+                    console.log(currentTime() + "[Taobao] Save new Cookies!");
+                }
+            })
+            .catch(function (err) {
+                console.log(err.message);
+            });
+
+        await axios
+            .get(process.env.API_ENDPOINT + "/api/taobao/cookies/alimama")
+            .then(function (res) {
+                if (res.data.length > 0) {
+                    fs.writeFileSync(
+                        "storage/cookies/alimama." +
+                            process.env.ALIMAMA_USERNAME +
+                            ".json",
+                        JSON.stringify(res.data, null, 2)
+                    );
+                    page.setCookie(...res.data);
+                    console.log(currentTime() + "[Alimama] Save new Cookies!");
+                }
+            })
+            .catch(function (err) {
+                console.log(err.message);
+            });
+
         // 刷新页面
         let date = new Date();
         let hours = date.getHours();
@@ -85,50 +121,6 @@ puppeteer.use(StealthPlugin());
         if (minutes % 5 == 0) {
             console.log(currentTime() + "[Alimama] Refreshing to Keep Alive!");
             (async () => {
-                await axios
-                    .get(
-                        process.env.API_ENDPOINT + "/api/taobao/cookies/taobao"
-                    )
-                    .then(function (res) {
-                        if (res.data.length > 0) {
-                            fs.writeFileSync(
-                                "storage/cookies/taobao." +
-                                    process.env.ALIMAMA_USERNAME +
-                                    ".json",
-                                JSON.stringify(res.data, null, 2)
-                            );
-                            page.setCookie(...res.data);
-                            console.log(
-                                currentTime() + "[Taobao] Save new Cookies!"
-                            );
-                        }
-                    })
-                    .catch(function (err) {
-                        console.log(err.message);
-                    });
-
-                await axios
-                    .get(
-                        process.env.API_ENDPOINT + "/api/taobao/cookies/alimama"
-                    )
-                    .then(function (res) {
-                        if (res.data.length > 0) {
-                            fs.writeFileSync(
-                                "storage/cookies/alimama." +
-                                    process.env.ALIMAMA_USERNAME +
-                                    ".json",
-                                JSON.stringify(res.data, null, 2)
-                            );
-                            page.setCookie(...res.data);
-                            console.log(
-                                currentTime() + "[Alimama] Save new Cookies!"
-                            );
-                        }
-                    })
-                    .catch(function (err) {
-                        console.log(err.message);
-                    });
-
                 const pages = [
                     "https://pub.alimama.com/portal/v2/tool/links/page/home/index.htm",
                     "https://pub.alimama.com/portal/v2/tool/toolServiceProviderMarket/index.htm",
